@@ -48,35 +48,28 @@
 #     else:
 #         st.header("Not Spam")
 
-
 import streamlit as st
-import pickle 
-import string
-# import nltk
-# import os
-# nltk.data.path.append(os.path.join(os.getcwd(), "nltk_data"))
-
-# nltk.download('punkt')
-# nltk.download('stopwords')
-
-# from nltk.corpus import stopwords
-# from nltk.stem import PorterStemmer
-import streamlit as st
-import nltk
 import os
+import nltk
+import pickle
+import string
+from nltk.stem import PorterStemmer
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
 
-# Optional: Create a local nltk_data directory if needed
-nltk_data_dir = os.path.join(os.path.dirname(__file__), "nltk_data")
-os.makedirs(nltk_data_dir, exist_ok=True)
-nltk.data.path.append(nltk_data_dir)
+# Set up nltk data path and download resources if needed
+nltk_data_path = os.path.join(os.path.dirname(__file__), 'nltk_data')
+os.makedirs(nltk_data_path, exist_ok=True)
+nltk.data.path.append(nltk_data_path)
 
-# Ensure both punkt and stopwords are downloaded properly
-for resource in ['punkt', 'stopwords']:
+for res in ['punkt', 'stopwords']:
     try:
-        nltk.data.find(f'tokenizers/{resource}' if resource == 'punkt' else f'corpora/{resource}')
+        if res == 'punkt':
+            nltk.data.find('tokenizers/punkt')
+        else:
+            nltk.data.find('corpora/stopwords')
     except LookupError:
-        nltk.download(resource, download_dir=nltk_data_dir)
-
+        nltk.download(res, download_dir=nltk_data_path)
 
 # from nltk.corpus import stopwords
 # from nltk.stem import PorterStemmer
@@ -100,15 +93,11 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
-from nltk.stem import PorterStemmer
-
 ps = PorterStemmer()
 
 def transform_text(message):
     message = message.lower()
-    message = word_tokenize(message)  # ← this is important
+    message = word_tokenize(message)  # <- uses punkt safely
     y = []
     for i in message:
         if i.isalnum():
@@ -123,6 +112,7 @@ def transform_text(message):
     for i in message:
         y.append(ps.stem(i))
     return " ".join(y)
+
 
 # Load vectorizer and model
 tfidf = pickle.load(open('vectorizer.pkl', 'rb'))
