@@ -61,24 +61,22 @@ import string
 
 # from nltk.corpus import stopwords
 # from nltk.stem import PorterStemmer
+import streamlit as st
 import nltk
 import os
 
-# Set custom NLTK data directory inside the project
-nltk_path = os.path.join(os.path.dirname(__file__), 'nltk_data')
-os.makedirs(nltk_path, exist_ok=True)
-nltk.data.path.append(nltk_path)
+# Optional: Create a local nltk_data directory if needed
+nltk_data_dir = os.path.join(os.path.dirname(__file__), "nltk_data")
+os.makedirs(nltk_data_dir, exist_ok=True)
+nltk.data.path.append(nltk_data_dir)
 
-# Download punkt and stopwords only if not already downloaded
-try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-    nltk.download('punkt', download_dir=nltk_path)
+# Ensure both punkt and stopwords are downloaded properly
+for resource in ['punkt', 'stopwords']:
+    try:
+        nltk.data.find(f'tokenizers/{resource}' if resource == 'punkt' else f'corpora/{resource}')
+    except LookupError:
+        nltk.download(resource, download_dir=nltk_data_dir)
 
-try:
-    nltk.data.find('corpora/stopwords')
-except LookupError:
-    nltk.download('stopwords', download_dir=nltk_path)
 
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
