@@ -64,15 +64,17 @@ import string
 import nltk
 import os
 
-# Define a local directory for nltk_data
-nltk_data_dir = os.path.join(os.getcwd(), 'nltk_data')
+# Create local nltk_data directory (if not exists)
+nltk_data_path = os.path.join(os.path.dirname(__file__), 'nltk_data')
+os.makedirs(nltk_data_path, exist_ok=True)
 
-# Append it to nltk's search path
-nltk.data.path.append(nltk_data_dir)
+# Set the download path for NLTK data
+nltk.data.path.append(nltk_data_path)
 
-# Download necessary resources to that directory
-nltk.download('punkt', download_dir=nltk_data_dir)
-nltk.download('stopwords', download_dir=nltk_data_dir)
+# Download necessary resources to that local directory
+nltk.download('punkt', download_dir=nltk_data_path)
+nltk.download('stopwords', download_dir=nltk_data_path)
+
 
 
 # Minimal styling using markdown
