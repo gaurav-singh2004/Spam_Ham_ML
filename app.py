@@ -58,6 +58,7 @@ nltk.download('stopwords')
 
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
+nltk.data.path.append(os.path.join(os.getcwd(), "nltk_data"))
 
 # Minimal styling using markdown
 st.markdown("""
