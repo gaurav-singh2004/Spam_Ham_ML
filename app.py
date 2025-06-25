@@ -49,29 +49,16 @@
 #         st.header("Not Spam")
 
 import streamlit as st
-import os
 import pickle
 import string
 import nltk
+import os
+
+nltk.data.path.append(os.path.join(os.getcwd(), 'nltk_data'))
+
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
-from nltk.tokenize import word_tokenize
-
-# Setup NLTK data path for Streamlit Cloud
-nltk_data_path = os.path.join(os.path.dirname(__file__), 'nltk_data')
-os.makedirs(nltk_data_path, exist_ok=True)
-nltk.data.path.append(nltk_data_path)
-
-# Download required resources if not present
-try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-    nltk.download('punkt', download_dir=nltk_data_path)
-
-try:
-    nltk.data.find('corpora/stopwords')
-except LookupError:
-    nltk.download('stopwords', download_dir=nltk_data_path)
+from nltk.tokenize import word_tokenize  # now works with local punkt
 
 # Streamlit UI styling
 st.markdown("""
