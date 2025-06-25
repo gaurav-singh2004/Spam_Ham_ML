@@ -50,31 +50,30 @@
 
 import streamlit as st
 import os
-import nltk
 import pickle
 import string
-from nltk.stem import PorterStemmer
+import nltk
 from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize
 
-# Set up nltk data path and download resources if needed
+# Setup NLTK data path for Streamlit Cloud
 nltk_data_path = os.path.join(os.path.dirname(__file__), 'nltk_data')
 os.makedirs(nltk_data_path, exist_ok=True)
 nltk.data.path.append(nltk_data_path)
 
-for res in ['punkt', 'stopwords']:
-    try:
-        if res == 'punkt':
-            nltk.data.find('tokenizers/punkt')
-        else:
-            nltk.data.find('corpora/stopwords')
-    except LookupError:
-        nltk.download(res, download_dir=nltk_data_path)
+# Download required resources if not present
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    nltk.download('punkt', download_dir=nltk_data_path)
 
-# from nltk.corpus import stopwords
-# from nltk.stem import PorterStemmer
+try:
+    nltk.data.find('corpora/stopwords')
+except LookupError:
+    nltk.download('stopwords', download_dir=nltk_data_path)
 
-# Minimal styling using markdown
+# Streamlit UI styling
 st.markdown("""
     <style>
         .main {
@@ -97,7 +96,7 @@ ps = PorterStemmer()
 
 def transform_text(message):
     message = message.lower()
-    message = word_tokenize(message)  # <- uses punkt safely
+    message = word_tokenize(message)
     y = []
     for i in message:
         if i.isalnum():
@@ -113,11 +112,11 @@ def transform_text(message):
         y.append(ps.stem(i))
     return " ".join(y)
 
-
 # Load vectorizer and model
 tfidf = pickle.load(open('vectorizer.pkl', 'rb'))
 model = pickle.load(open('model.pkl', 'rb'))
 
+# Streamlit App UI
 st.title("Email/SMS Spam Classifier")
 
 input_sms = st.text_area("Enter the message...")
@@ -131,3 +130,4 @@ if st.button("Predict"):
         st.markdown('<div class="result">🚫 Spam</div>', unsafe_allow_html=True)
     else:
         st.markdown('<div class="result">✅ Not Spam</div>', unsafe_allow_html=True)
+
