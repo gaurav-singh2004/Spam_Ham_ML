@@ -78,8 +78,8 @@ for resource in ['punkt', 'stopwords']:
         nltk.download(resource, download_dir=nltk_data_dir)
 
 
-from nltk.corpus import stopwords
-from nltk.stem import PorterStemmer
+# from nltk.corpus import stopwords
+# from nltk.stem import PorterStemmer
 
 # Minimal styling using markdown
 st.markdown("""
@@ -100,11 +100,15 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
+
 ps = PorterStemmer()
 
 def transform_text(message):
     message = message.lower()
-    message = nltk.word_tokenize(message)
+    message = word_tokenize(message)  # ← this is important
     y = []
     for i in message:
         if i.isalnum():
