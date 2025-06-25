@@ -52,14 +52,21 @@
 import streamlit as st
 import pickle 
 import string
+# import os
+# import nltk 
+import nltk
 import os
-import nltk 
-nltk.download('punkt')
-nltk.download('stopwords')
+nltk.data.path.append(os.path.join(os.getcwd(), "nltk_data"))
+
+nltk.download('punkt', download_dir=os.path.join(os.getcwd(), 'nltk_data'))
+nltk.download('stopwords', download_dir=os.path.join(os.getcwd(), 'nltk_data'))
+
+# nltk.download('punkt')
+# nltk.download('stopwords')
 
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
-nltk.data.path.append(os.path.join(os.getcwd(), "nltk_data"))
+# nltk.data.path.append(os.path.join(os.getcwd(), "nltk_data"))
 
 # Minimal styling using markdown
 st.markdown("""
