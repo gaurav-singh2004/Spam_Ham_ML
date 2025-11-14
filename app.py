@@ -48,19 +48,19 @@
 #     else:
 #         st.header("Not Spam")
 
+
 import streamlit as st
-import pickle
+import pickle 
 import string
-import nltk
-import os
-
-nltk.data.path.append(os.path.join(os.getcwd(), 'nltk_data'))
-
+import nltk 
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
-from nltk.tokenize import word_tokenize  # now works with local punkt
 
-# Streamlit UI styling
+# ✅ Add this block
+nltk.download('punkt')
+nltk.download('stopwords')
+
+# Minimal styling using markdown
 st.markdown("""
     <style>
         .main {
@@ -83,7 +83,7 @@ ps = PorterStemmer()
 
 def transform_text(message):
     message = message.lower()
-    message = word_tokenize(message)
+    message = nltk.word_tokenize(message)
     y = []
     for i in message:
         if i.isalnum():
@@ -103,7 +103,6 @@ def transform_text(message):
 tfidf = pickle.load(open('vectorizer.pkl', 'rb'))
 model = pickle.load(open('model.pkl', 'rb'))
 
-# Streamlit App UI
 st.title("Email/SMS Spam Classifier")
 
 input_sms = st.text_area("Enter the message...")
@@ -117,4 +116,3 @@ if st.button("Predict"):
         st.markdown('<div class="result">🚫 Spam</div>', unsafe_allow_html=True)
     else:
         st.markdown('<div class="result">✅ Not Spam</div>', unsafe_allow_html=True)
-
