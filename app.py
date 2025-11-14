@@ -49,19 +49,125 @@
 #         st.header("Not Spam")
 
 
+# import streamlit as st
+# import pickle 
+# import string
+# import nltk 
+# from nltk.corpus import stopwords
+# from nltk.stem import PorterStemmer
+
+# # ✅ Add this block
+# nltk.download('punkt')
+# nltk.download('stopwords')
+
+# # Minimal styling using markdown
+# st.markdown("""
+#     <style>
+#         .main {
+#             padding: 20px;
+#             font-family: 'Segoe UI', sans-serif;
+#         }
+#         h1 {
+#             color: #2c3e50;
+#         }
+#         .result {
+#             font-size: 24px;
+#             font-weight: bold;
+#             color: #e74c3c;
+#             margin-top: 20px;
+#         }
+#     </style>
+# """, unsafe_allow_html=True)
+
+# ps = PorterStemmer()
+
+# def transform_text(message):
+#     message = message.lower()
+#     message = nltk.word_tokenize(message)
+#     y = []
+#     for i in message:
+#         if i.isalnum():
+#             y.append(i)
+#     message = y[:]
+#     y.clear()
+#     for i in message:
+#         if i not in stopwords.words('english') and i not in string.punctuation:
+#             y.append(i)
+#     message = y[:]
+#     y.clear()
+#     for i in message:
+#         y.append(ps.stem(i))
+#     return " ".join(y)
+
+# # Load vectorizer and model
+# tfidf = pickle.load(open('vectorizer.pkl', 'rb'))
+# model = pickle.load(open('model.pkl', 'rb'))
+
+# st.title("Email/SMS Spam Classifier")
+
+# input_sms = st.text_area("Enter the message...")
+
+# if st.button("Predict"):
+#     transform_sms = transform_text(input_sms)
+#     input_data_features = tfidf.transform([transform_sms])
+#     prediction = model.predict(input_data_features)[0]
+    
+#     if prediction == 1:
+#         st.markdown('<div class="result">🚫 Spam</div>', unsafe_allow_html=True)
+#     else:
+#         st.markdown('<div class="result">✅ Not Spam</div>', unsafe_allow_html=True)
+
+
 import streamlit as st
-import pickle 
+import pickle
 import string
-import nltk 
+import nltk
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 
-# ✅ Add this block
-nltk.download('punkt')
-nltk.download('stopwords')
+# ---------------- NLTK Setup ----------------
+@st.cache_resource
+def setup_nltk():
+    # Download required NLTK data only once per session
+    nltk.download("punkt")
+    nltk.download("punkt_tab")
+    nltk.download("stopwords")
+    return True
 
-# Minimal styling using markdown
-st.markdown("""
+setup_nltk()
+
+ps = PorterStemmer()
+EN_STOPWORDS = set(stopwords.words("english"))
+
+# ---------------- Text Preprocessing ----------------
+def transform_text(message: str) -> str:
+    # Lowercase
+    message = message.lower()
+    # Tokenize
+    tokens = nltk.word_tokenize(message)
+
+    # Keep only alphanumeric tokens
+    cleaned_tokens = [token for token in tokens if token.isalnum()]
+
+    # Remove stopwords and punctuation
+    filtered_tokens = [
+        token
+        for token in cleaned_tokens
+        if token not in EN_STOPWORDS and token not in string.punctuation
+    ]
+
+    # Stemming
+    stemmed_tokens = [ps.stem(token) for token in filtered_tokens]
+
+    return " ".join(stemmed_tokens)
+
+# ---------------- Load Model & Vectorizer ----------------
+tfidf = pickle.load(open("vectorizer.pkl", "rb"))
+model = pickle.load(open("model.pkl", "rb"))
+
+# ---------------- Streamlit UI ----------------
+st.markdown(
+    """
     <style>
         .main {
             padding: 20px;
@@ -73,46 +179,45 @@ st.markdown("""
         .result {
             font-size: 24px;
             font-weight: bold;
-            color: #e74c3c;
             margin-top: 20px;
         }
+        .spam {
+            color: #e74c3c;
+        }
+        .ham {
+            color: #27ae60;
+        }
     </style>
-""", unsafe_allow_html=True)
+    """,
+    unsafe_allow_html=True,
+)
 
-ps = PorterStemmer()
-
-def transform_text(message):
-    message = message.lower()
-    message = nltk.word_tokenize(message)
-    y = []
-    for i in message:
-        if i.isalnum():
-            y.append(i)
-    message = y[:]
-    y.clear()
-    for i in message:
-        if i not in stopwords.words('english') and i not in string.punctuation:
-            y.append(i)
-    message = y[:]
-    y.clear()
-    for i in message:
-        y.append(ps.stem(i))
-    return " ".join(y)
-
-# Load vectorizer and model
-tfidf = pickle.load(open('vectorizer.pkl', 'rb'))
-model = pickle.load(open('model.pkl', 'rb'))
-
-st.title("Email/SMS Spam Classifier")
+st.title("📧 Email/SMS Spam Classifier")
 
 input_sms = st.text_area("Enter the message...")
 
 if st.button("Predict"):
-    transform_sms = transform_text(input_sms)
-    input_data_features = tfidf.transform([transform_sms])
-    prediction = model.predict(input_data_features)[0]
-    
-    if prediction == 1:
-        st.markdown('<div class="result">🚫 Spam</div>', unsafe_allow_html=True)
+    if not input_sms.strip():
+        st.warning("Please enter a message to classify.")
     else:
-        st.markdown('<div class="result">✅ Not Spam</div>', unsafe_allow_html=True)
+        # 1. Preprocess
+        transformed_sms = transform_text(input_sms)
+
+        # 2. Vectorize
+        input_data_features = tfidf.transform([transformed_sms])
+
+        # 3. Predict
+        prediction = model.predict(input_data_features)[0]
+
+        # 4. Show Result
+        if prediction == 1:
+            st.markdown(
+                '<div class="result spam">🚫 Spam</div>',
+                unsafe_allow_html=True,
+            )
+        else:
+            st.markdown(
+                '<div class="result ham">✅ Not Spam</div>',
+                unsafe_allow_html=True,
+            )
+
